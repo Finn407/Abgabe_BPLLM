@@ -1,0 +1,103 @@
+﻿@page "/ImageCreation"
+@rendermode InteractiveServer
+@using BlazorApp1.Data
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using BlazorApp1.Components.Pages
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavManager
+@inject ProtectedLocalStorage BrowserStorage
+@inject LLMService LLMService
+@inject StringService StringService
+@inject IOCrService OcrService
+@using Toolbelt.Blazor.SpeechRecognition
+@inject SpeechRecognition SpeechRecognition
+@implements IDisposable
+
+<PageTitle>Index</PageTitle>
+
+<div class="row">
+    <div class="col-sm-12 col-lg-4">
+        <div class="text-editor">
+            <canvas id="signature-pad" class="signature-pad border" width="@textImageWidth" height="@textImageHeight" style="background-image: url('@textImageUrl');background-repeat: no-repeat;" @ref="_canvas"></canvas>
+            <br />
+            <button type="button" id="clear-signature" class="btn btn-light border">Clear</button>
+            <button type="button" id="yellow" class="btn btn-light border" data-toggle="modal" data-target="#markButtonModal">mark</button>
+            <button type="button" class="btn btn-light border" data-toggle="modal" data-target="#generateButtonModal">generate</button>
+            <button type="button" class="btn btn-light border" data-toggle="modal" data-target="#formulateButtonModal">formulate</button>
+        </div>
+    </div>
+    <div class="col-sm-12 col-lg-3">
+        <div class="chat-container">
+            @for (int i = 0; i < userPromptCounter; i++)
+            {
+                <div class="prompt">@userPrompts[i]</div>
+                <div class="response" id="response-@i">
+                    @promptAnswers[i]
+                    <button type="button" onclick="copyToClipboard('response-@i')">📋</button>
+                </div>
+            }
+        </div>
+        <input type="text" @bind="userPrompt" class="form-control" placeholder="Enter your text here" hidden="@ChatInputHidden" />
+        <div style="text-align: right; width: 100%;">
+            <br />
+            <button type="button" class="btn btn-primary btn-sm" hidden="@speechButtonHidden" @onclick="speech">@speechButtonText</button>
+            <button type="button" class="btn btn-primary btn-sm" @onclick="@processInput">Send</button>
+            <button type="button" class="btn btn-primary btn-sm" @onclick="switchTo">@switchText</button>
+            <br />
+            <br />
+            <button type="button" class="btn btn-primary btn-sm" hidden="@viewResultHidden" @onclick="viewResult">View in Editor</button>
+            <button type="button" class="btn btn-primary btn-sm" @onclick="back">⮌</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="generateButtonModal" tabindex="-1" aria-labelledby="generateButtonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="generateButtonModalLabel">Please mark the start and end</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button type="button" class="btn btn-primary btn-block" id="orange" @onclick="@SelectGenerate">Start</button>
+                <button type="button" class="btn btn-primary btn-block" id="cyan" @onclick="@SelectGenerate">End</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="formulateButtonModal" tabindex="-1" aria-labelledby="formulateButtonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formulateButtonModalLabel">Please mark the context and the word that you are looking to replace</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button type="button" id="purple" class="btn btn-primary btn-block" @onclick="@( () => SelectFormulate("context") )">Context</button>
+                <button type="button" id="red" class="btn btn-primary btn-block" @onclick="@( () => SelectFormulate("word") )">Word</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="markButtonModal" tabindex="-1" aria-labelledby="markButtonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="markButtonModalLabel">Select pensize</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button type="button" id="yellowbig" class="btn btn-primary btn-block" @onclick="@( () => SelectMass("big") )">big</button>
+                <button type="button" id="yellowsmall" class="btn btn-primary btn-block" @onclick="@( () => SelectMass("small") )">small</button>
+            </div>
+        </div>
+    </div>
+</div>
