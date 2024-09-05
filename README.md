@@ -1,5 +1,5 @@
 Installation über Git / Visual Studio
-1.	Laden Sie sich Visual Studio 2022 Enterprise Edition (Test Version: https://visualstudio.microsoft.com/de/downloads/ ) , (Vollversion: https://azureforeducation.microsoft.com/devtools (Lernressourcen -> Software -> Visual Studio 2022 Enterprise Edition)
+1.	Laden Sie sich Visual Studio 2022 Enterprise Edition (Test Version: https://visualstudio.microsoft.com/de/downloads/ ) 
 2.	Installieren Sie Visual Studio mittels des Installers. Wählen Sie dabei das Paket „ASP.NET and web development“ aus und installieren Sie dieses damit mit.
 3.	Schließen Sie die Installation von Visual Studio ab
 4.	Laden Sie sich das Projekt unter: „https://github.com/Finn407/Abgabe_BPLLM“ als .zip herunter
